@@ -1,10 +1,6 @@
 #Header Files
 import json
 
-#Global variables
-fileIn = open("json.txt","r") #Open json file
-fileOut = open("outNew2.txt","w") #output file
-
 #functions
 def check(inp,prefix):
     if inp=='1':
@@ -48,6 +44,20 @@ def cells(cell,x,prefix):
                 out1=connect['Q']
                 outQ=out1[0]
                 line =  prefix+str(outQ)+'='+typ+'('+str(inpD)+','+str(inpC)+','+str(inpR)+')\n'
+        elif ty=='$_DFFSR_PPP_':
+                inp1=connect['C']
+                inpC=check(inp1[0],prefix)
+                inp2=connect['D']
+                inpD=check(inp2[0],prefix)
+                inp3=connect['R']
+                inpR=check(inp3[0],prefix)
+                inp4=connect['S']
+                inpS=check(inp4[0],prefix)
+                out1=connect['Q']
+                outQ=out1[0]
+                line1 =  str(outQ)+'_dffsr'+'='+'dffcr'+'('+str(inpD)+','+str(inpC)+','+str(inpR)+')\n'
+                line2 = prefix+str(outQ)+'='+'or'+'('+str(outQ)+'_dffsr'+','+str(inpS)+')\n'
+                line = line1+line2
         elif ty=='$_XOR_':
                 typ='xor'
                 inp1=connect['A']
@@ -109,28 +119,34 @@ def subModule(y,prefix):
                #print(temp)
                 length = len(temp) 
                 for i in range(length):
-                	rhs = str(temp[i])
-                	lhs = prefix+str(Sub['ports'][z]['bits'][i])
-                	if Sub['ports'][z]['direction']=='output':
-                		swap=rhs
-                		rhs=lhs
-                		lhs=swap
-                	line = lhs+'='+rhs+'\n'
-                	#line = prefix+z+'='+str(z)+'\n'
-                	fileOut.write(line)
+                    rhs = str(temp[i])
+                    lhs = prefix+str(Sub['ports'][z]['bits'][i])
+                    if Sub['ports'][z]['direction']=='output':
+                        swap=rhs
+                        rhs=lhs
+                        lhs=swap
+                    line = lhs+'='+rhs+'\n'
+                    #line = prefix+z+'='+str(z)+'\n'
+                    fileOut.write(line)
         for q in cell:
             cells(cell,q,prefix)
 
 
 
 #main block
+InName=input('Enter Name of Json File: ')
+OutName=input('Enter name of Output Json File: ')
+TopName=input('Enter name of Top Module: ')
+fileIn = open(InName,"r") #Open json file
+fileOut = open(OutName,"w") #output file
+
 content = fileIn.read() #To copy input file in a variable
 content_dict = json.loads(content) #read as json
 # print(content_dict) #if wanna check
 modules = content_dict['modules']  #reach modules
 
 #start parsing modules
-Top = modules['uart']  #to required module
+Top = modules[TopName]  #to required module
 ports = Top['ports'] #to ports
 fileOut.write('input(0)\ninput(1)\ninput(x)\n')
 for x in ports:                 #loop for getting ports
